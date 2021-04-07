@@ -21,18 +21,15 @@
     <ClCompile Include="SDBotTools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenCVTools.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDBotTools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OpenCVTools.h">
+    <ClInclude Include="OpenCVAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WinApi.h">
+    <ClInclude Include="WinAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

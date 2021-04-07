@@ -146,13 +146,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OpenCVTools.cpp" />
     <ClCompile Include="SDBotTools.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OpenCVTools.h" />
+    <ClInclude Include="OpenCVAPI.h" />
     <ClInclude Include="SDBotTools.h" />
-    <ClInclude Include="WinApi.h" />
+    <ClInclude Include="WinAPI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
