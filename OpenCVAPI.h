@@ -13,7 +13,7 @@ public:
 	 *
 	 * @return Bitmap header.
 	 */
-	static BITMAPINFOHEADER createBitmapHeader(int width, int height){
+	BITMAPINFOHEADER createBitmapHeader(int width, int height){
 		BITMAPINFOHEADER  bi;
 
 		// create a bitmap
@@ -39,7 +39,7 @@ public:
 	 *
 	 * @return Mat (Mat of the captured image)
 	 */
-	static void captureScreenMat(HWND hwnd, cv::Mat& src) {
+	void captureScreenMat(HWND hwnd, cv::Mat& src) {
 
 		// get handles to a device context (DC)
 		HDC hwindowDC = GetDC(hwnd);
@@ -73,12 +73,12 @@ public:
 		ReleaseDC(hwnd, hwindowDC);
 	}
 
-	static void createMatFromMatSrc(cv::Mat& src, cv::Mat& tmp, int xInit, int yInit, int width, int height) {
+	void createMatFromMatSrc(cv::Mat& src, cv::Mat& tmp, int xInit, int yInit, int width, int height) {
 		cv::Rect rectImg(xInit, yInit, width, height);
 		tmp = src(rectImg);
 	}
 
-	static bool saveMatToFile(cv::Mat src, cv::String file, cv::String filename) {
+	bool saveMatToFile(cv::Mat src, cv::String file, cv::String filename) {
 		std::vector<uchar> buf;
 		cv::imencode(file, src, buf);
 		cv::imwrite(filename + file, src);
@@ -87,7 +87,7 @@ public:
 		return true;
 	}
 
-	static cv::Mat readMat(std::string code) {
+	cv::Mat readMat(std::string code) {
 		return cv::imread(
 			cv::samples::findFile("./items/" + code + ".png"),
 			cv::IMREAD_UNCHANGED);
