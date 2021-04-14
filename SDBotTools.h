@@ -6,6 +6,30 @@
 
 using namespace std;
 
+class SDWindow {
+protected:
+	HWND hwnd;
+	bool fullBank;
+public:
+	SDWindow(HWND hwnd) {
+		this->hwnd = hwnd;
+		this->fullBank = false;
+	}
+	~SDWindow() {}
+	HWND getWindow() {
+		return hwnd;
+	}
+	void setWindow(HWND hwnd) {
+		this->hwnd = hwnd;
+	}
+	void setFullBank(bool fullBank) {
+		this->fullBank = fullBank;
+	}
+	bool isFullBank() {
+		return fullBank;
+	}
+};
+
 class Pos {
 private:
 	bool bkup;
@@ -171,16 +195,16 @@ public:
 	SDConfig() {
 		this->xTamItem = 37;
 		this->yTamItem = 38;
-		hwnds = new vector<HWND>();
+		sdWindows = new vector<SDWindow*>();
 	}
 	~SDConfig() {}
 	std::string windowTitle;
 	int xTamItem, yTamItem;
-	std::vector<HWND>* hwnds;
+	std::vector<SDWindow*>* sdWindows;
 	static SDConfig* getConfig();
 	void init();
 	virtual void start() { cout << "start method from SDConfig called..." << endl; };
-	virtual void run(HWND window) { cout << "run method from SDConfig called..." << endl; };
+	virtual void run(SDWindow* sdWindow) { cout << "run method from SDConfig called..." << endl; };
 	void codesToItems(std::string codes);
 	int getSpeed() {
 		return speed;
@@ -205,7 +229,7 @@ public:
 		GetWindowTextA(hwnd, windowTitle, tamTitle);
 
 		if (strcmp(windowTitle, config->windowTitle.c_str()) == 0) {
-			config->hwnds->push_back(hwnd);
+			config->sdWindows->push_back(new SDWindow(hwnd));
 		}
 
 		return true;
@@ -246,5 +270,5 @@ public:
 	double matResultScore;
 	bool match;
 	void start() override;
-	void run(HWND window) override;
+	void run(SDWindow* sdWindow) override;
 };

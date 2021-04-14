@@ -16,9 +16,10 @@ int main()
 	script->start();
 
 	while (script != nullptr) {
-		for (HWND window : *script->hwnds) {
+		for (SDWindow * window : *script->sdWindows) {
 		maximize:
-			ShowWindow(window, SW_SHOWNOACTIVATE);
+			Sleep(500);
+			ShowWindow(window->getWindow(), SW_SHOWNOACTIVATE);
 			Sleep(2000);
 
 		running:
@@ -28,9 +29,9 @@ int main()
 		minimize:
 			cout << "Free for " << script->getSpeed() / 1000 << endl;
 			Sleep(script->getSpeed());
-			if (script->hwnds->size() > 1) {
+			if (script->sdWindows->size() > 1) {
 				cout << "minimized..." << endl;
-				ShowWindow(window, SW_MINIMIZE);
+				ShowWindow(window->getWindow(), SW_MINIMIZE);
 			}
 		}
 	}

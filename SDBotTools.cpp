@@ -135,17 +135,17 @@ void SDConfig::init() {
 	if (option == 1) {
 		HWND tmpWindow = FindWindowA(NULL, windowTitle.c_str());
 		SetWindowTextA(tmpWindow, strWindow.c_str());
-		hwnds->push_back(tmpWindow);
+		sdWindows->push_back(new SDWindow(tmpWindow));
 	}
 	else if (option == 2 && EnumWindows(enumWindowsCallback, (LPARAM)this)) {
-		for (HWND w : *hwnds) {
-			SetWindowTextA(w, strWindow.c_str());
+		for (SDWindow* w : *sdWindows) {
+			SetWindowTextA(w->getWindow(), strWindow.c_str());
 		}
 	}
 
 	windowTitle = strWindow;
 
-	cout << "Supreme Destiny Windows Count: " << hwnds->size() << endl << endl;
+	cout << "Supreme Destiny Windows Count: " << sdWindows->size() << endl << endl;
 
 	cout << "Insert the codes (use ,):" << "\n";
 	std::string codes;
@@ -190,17 +190,17 @@ void SDDropConfig::start() {
 	cout << "Drop script config finished...\n";
 }
 
-void SDDropConfig::run(HWND window) {
-	bag->setWindow(window);
-	bank->setWindow(window);
+void SDDropConfig::run(SDWindow * w) {
+	bag->setWindow(w->getWindow());
+	bank->setWindow(w->getWindow());
 	// clear bag
 	bag->restart();
 	bag->bagToBankItems.clear();
 	clearItemBkup();
-	captureScreenMat(window, matWindow);
+	captureScreenMat(w->getWindow(), matWindow);
 	for (int pBag = 0; pBag < bag->capacity; pBag++) {
 		if (pBag % 15 == 0) {
-			captureScreenMat(window, matWindow);
+			captureScreenMat(w->getWindow(), matWindow);
 			clearItemBkup();
 		}
 		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 13, bag->getY() - 12, xTamItem, yTamItem);
@@ -238,14 +238,14 @@ void SDDropConfig::run(HWND window) {
 	}
 
 	//count items and verify bag capacity
-	//if (bank->fullBank) return;
+	if (w->isFullBank()) return;
 	if (bag->bagToBankItems.size() >= bagToBank) {
 		bag->restart();
 		bank->restart();
-		captureScreenMat(window, matWindow);
+		captureScreenMat(w->getWindow(), matWindow);
 		for (int pBank = 0; pBank < bank->capacity; pBank++) {
 			if (bag->bagToBankItems.size() == 0) break;
-			if (pBank % 40 == 0) captureScreenMat(window, matWindow);
+			if (pBank % 40 == 0) captureScreenMat(w->getWindow(), matWindow);
 			createMatFromMatSrc(matWindow, matTmp, bank->getX() - 13, bank->getY() - 12, xTamItem, yTamItem);
 			cv::matchTemplate(matTmp, items->at(0)->getMat(), matResult, cv::TM_CCOEFF_NORMED);
 			cv::minMaxLoc(matResult, 0, &matResultScore);
@@ -261,7 +261,7 @@ void SDDropConfig::run(HWND window) {
 
 			bank->upXY(pBank);
 		}
-		//if (bag->bagToBankItems.size() > 0) bank->full = true;
+		if (bag->bagToBankItems.size() > 0) w->setFullBank(true);
 	}
 }
 
