@@ -81,7 +81,7 @@ SDConfig* SDConfig::getConfig() {
 		return new SDDropConfig();
 		//trade box
 	case SDGoldDragonTradeBox:
-		return nullptr;
+		return new SDDragonTradeBoxConfig();
 	default:
 		return nullptr;
 	}
@@ -263,5 +263,16 @@ void SDDropConfig::run(SDWindow * w) {
 		}
 		if (bag->bagToBankItems.size() > 0) w->setFullBank(true);
 	}
+}
+
+void SDDragonTradeBoxConfig::start(){}
+
+void SDDragonTradeBoxConfig::run(SDWindow* w) {
+	//call SDDropConfig
+	//super::start();
+	//super::run(w);
+
+	COLORREF color = getPixel(497, 149);
+	std::cout << "R: " << (unsigned int)GetRValue(color) << "G: " << (unsigned int)GetGValue(color) << "B: " << (unsigned int)GetBValue(color) << endl;
 }
 

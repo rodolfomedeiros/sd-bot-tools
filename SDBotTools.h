@@ -182,7 +182,7 @@ public:
 	void restart();
 };
 
-class SDConfig : public OpenCVAPI {
+class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
 	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2 };
 
@@ -269,6 +269,15 @@ public:
 	cv::Mat matWindow, matTmp, matResult;
 	double matResultScore;
 	bool match;
+	void start() override;
+	void run(SDWindow* sdWindow) override;
+};
+
+class SDDragonTradeBoxConfig: public SDDropConfig {
+public:
+	typedef SDDropConfig super;
+	SDDragonTradeBoxConfig() {};
+	~SDDragonTradeBoxConfig() {};
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };

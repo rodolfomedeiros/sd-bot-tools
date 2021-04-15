@@ -45,8 +45,7 @@ public:
 		Sleep(50);
 		// send enter key
 		PostMessage(window, WM_KEYDOWN, VK_RETURN, 1);
-		//SendMessage(window, WM_KEYDOWN, VK_RETURN, 1);
-		Sleep(100);
+		Sleep(150);
 	}
 
 	INT GetAbsoluteCoordinate(INT PixelCoordinate, INT ScreenResolution)
@@ -86,5 +85,9 @@ public:
 		//
 		sendClick(WM_LBUTTONDOWN, (posY << 16) + posX, 10);
 		sendClick(WM_LBUTTONUP, (posY << 16) + posX, delay);
+	}
+
+	COLORREF getPixel(int x, int y) {
+		return GetPixel(GetWindowDC(window), x, y);
 	}
 };
