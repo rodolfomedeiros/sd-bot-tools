@@ -88,8 +88,13 @@ public:
 	}
 
 	cv::Mat readMat(std::string code) {
-		return cv::imread(
-			cv::samples::findFile("./items/" + code + ".png"),
-			cv::IMREAD_UNCHANGED);
+
+		std::string strPath = cv::samples::findFile("./items/" + code + ".png", false, true);
+		
+		if (!strPath.empty()) {
+			return cv::imread(strPath, cv::IMREAD_UNCHANGED);
+		}
+
+		return cv::Mat(0,0,1);
 	}
 };

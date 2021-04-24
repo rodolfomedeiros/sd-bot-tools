@@ -29,7 +29,7 @@ int main()
 		minimize:
 			cout << "Free for " << script->getSpeed() / 1000 << endl;
 			Sleep(script->getSpeed());
-			if (script->sdWindows->size() > 1) {
+			if (script->minimize) {
 				cout << "minimized..." << endl;
 				ShowWindow(window->getWindow(), SW_MINIMIZE);
 			}

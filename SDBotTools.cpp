@@ -72,6 +72,7 @@ SDConfig* SDConfig::getConfig() {
 	cout << "SCRIPT SELECTION\n";
 	cout << "[1] - Drop" << endl;
 	cout << "[2] - Gold Dragon Trade Box" << endl;
+	cout << "[3] - Drop with Bank" << endl;
 	cout << "Select script: ";
 	cin >> option;
 
@@ -79,9 +80,10 @@ SDConfig* SDConfig::getConfig() {
 		//drop
 	case SDDrop:
 		return new SDDropConfig();
-		//trade box
 	case SDGoldDragonTradeBox:
 		return new SDDragonTradeBoxConfig();
+	case SDDropWithBank:
+		return new SDDropWithBankConfig();
 	default:
 		return nullptr;
 	}
@@ -91,24 +93,41 @@ void SDConfig::codesToItems(std::string codes) {
 	items = new std::vector<Item*>();
 	size_t pos = 0;
 	std::string delimiter = ",";
-	items->push_back(new Item("000", false, readMat("000")));
-	items->back()->toString();
+	//Read 000
+	readItem("0000", false);
 	bool tag;
 	while ((pos = codes.find(delimiter)) != string::npos) {
 		tag = false;
 		if (codes.at(0) == '1') {
 			tag = true;
 		}
-		items->push_back(new Item(codes.substr(1, pos - 1), tag, readMat(codes.substr(1, pos - 1))));
-		items->back()->toString();
+		readItem(codes.substr(1, pos - 1), tag);
 		codes.erase(0, pos + delimiter.length());
 	}
 	tag = false;
 	if (codes.at(0) == '1') {
 		tag = true;
 	}
-	items->push_back(new Item(codes.substr(1, string::npos), tag, readMat(codes.substr(1, string::npos))));
-	items->back()->toString();
+	readItem(codes.substr(1, string::npos), tag);
+}
+
+void SDConfig::readItem(std::string code, bool tag) {
+	int count = 48;
+	cv::Mat matImg;
+	//49=1 to 51=3 ASCII table
+	while (count <= 51){
+		cout << "put:" << code << "/"<< count << endl;
+		matImg = readMat(code);
+
+		if (matImg.data != NULL) {
+			items->push_back(new Item(code, tag, matImg));
+			items->back()->toString();
+		}
+		if (count == 48)
+			code.push_back(++count);
+		else
+			code.at(code.size() - 1) = ++count;
+	} 
 }
 
 void SDConfig::init() {
@@ -147,6 +166,12 @@ void SDConfig::init() {
 
 	cout << "Supreme Destiny Windows Count: " << sdWindows->size() << endl << endl;
 
+	cout << "Minimize? (Default " << (bool)minimize << ")\n";
+	cout << "[1] True or [2] False: ";
+	cin >> option;
+
+	if (option == 2) minimize = false;
+
 	cout << "Insert the codes (use ,):" << "\n";
 	std::string codes;
 	cin >> codes;
@@ -171,22 +196,10 @@ void SDConfig::init() {
 	}
 
 	cout << "\nConfig Initial finished...\n";
+	cout << "Loading script selected config...\n";
 }
 
 void SDDropConfig::start() {
-	cout << "Loading script selected config...\n";
-
-	int option;
-
-	cout << "Change BagToBank (0-25)? (default " << bagToBank << ")" << "\n";
-	cout << "[1] No or [2] Yes: ";
-	cin >> option;
-
-	if (option == 2) {
-		cout << "BagToBank: ";
-		cin >> bagToBank;
-	}
-
 	cout << "Drop script config finished...\n";
 }
 
@@ -220,7 +233,7 @@ void SDDropConfig::run(SDWindow * w) {
 						item->getXYBkup()->setBkup(true);
 					}
 					item->getXYBkup()->setXY(bag->getX(), bag->getY());
-				}else if (!item->getGather() && item->getCode().compare("000") != 0) {
+				}else if (!item->getGather() && item->getCode().compare("0000") != 0) {
 					bag->bagToBankItems.push_back(pBag);
 					//cout << "bag to bank: (" << pBag << ")" << endl;
 				}
@@ -236,6 +249,27 @@ void SDDropConfig::run(SDWindow * w) {
 
 		bag->upXY(pBag);
 	}
+}
+
+void SDDropWithBankConfig::start() {
+	super::start();
+
+	int option;
+
+	cout << "Change BagToBank (0-25)? (default " << bagToBank << ")" << "\n";
+	cout << "[1] No or [2] Yes: ";
+	cin >> option;
+
+	if (option == 2) {
+		cout << "BagToBank: ";
+		cin >> bagToBank;
+	}
+
+	cout << "DropWithBank script config finished...\n";
+}
+
+void SDDropWithBankConfig::run(SDWindow* w) {
+	super::run(w);
 
 	//count items and verify bag capacity
 	if (w->isFullBank()) return;
@@ -256,7 +290,7 @@ void SDDropConfig::run(SDWindow * w) {
 				bag->suapItem(bag->getX(), bag->getY(), bank->getX(), bank->getY(), 800);
 			}
 			else {
-				cout << "Bank item found: (" << pBank << ")("<< matResultScore << ")" << endl;
+				cout << "Bank item found: (" << pBank << ")(" << matResultScore << ")" << endl;
 			}
 
 			bank->upXY(pBank);
@@ -272,7 +306,9 @@ void SDDragonTradeBoxConfig::run(SDWindow* w) {
 	//super::start();
 	//super::run(w);
 
-	COLORREF color = getPixel(497, 149);
-	std::cout << "R: " << (unsigned int)GetRValue(color) << "G: " << (unsigned int)GetGValue(color) << "B: " << (unsigned int)GetBValue(color) << endl;
-}
+	//COLORREF color = getPixel(497, 149);
+	//std::cout << "R: " << (unsigned int)GetRValue(color) << "G: " << (unsigned int)GetGValue(color) << "B: " << (unsigned int)GetBValue(color) << endl;
+	// additional information
 
+
+}

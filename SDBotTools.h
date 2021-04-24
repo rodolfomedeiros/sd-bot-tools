@@ -184,7 +184,7 @@ public:
 
 class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
-	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2 };
+	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3};
 
 	//proprerties
 	int speed;
@@ -198,6 +198,7 @@ public:
 		sdWindows = new vector<SDWindow*>();
 	}
 	~SDConfig() {}
+	bool minimize = true;
 	std::string windowTitle;
 	int xTamItem, yTamItem;
 	std::vector<SDWindow*>* sdWindows;
@@ -206,6 +207,7 @@ public:
 	virtual void start() { cout << "start method from SDConfig called..." << endl; };
 	virtual void run(SDWindow* sdWindow) { cout << "run method from SDConfig called..." << endl; };
 	void codesToItems(std::string codes);
+	void readItem(std::string code, bool tag);
 	int getSpeed() {
 		return speed;
 	}
@@ -237,7 +239,6 @@ public:
 };
 
 class SDDropConfig : public SDConfig {
-protected:
 public:
 	SDDropConfig() {
 		/*
@@ -273,11 +274,20 @@ public:
 	void run(SDWindow* sdWindow) override;
 };
 
+class SDDropWithBankConfig : public SDDropConfig {
+public:
+	typedef SDDropConfig super;
+	SDDropWithBankConfig(){}
+	~SDDropWithBankConfig(){}
+	void start() override;
+	void run(SDWindow* w) override;
+};
+
 class SDDragonTradeBoxConfig: public SDDropConfig {
 public:
 	typedef SDDropConfig super;
-	SDDragonTradeBoxConfig() {};
-	~SDDragonTradeBoxConfig() {};
+	SDDragonTradeBoxConfig() {}
+	~SDDragonTradeBoxConfig() {}
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };
