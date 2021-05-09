@@ -184,7 +184,7 @@ public:
 
 class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
-	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3};
+	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4};
 
 	//proprerties
 	int speed;
@@ -289,6 +289,31 @@ public:
 	typedef SDDropConfig super;
 	SDDragonTradeBoxConfig() {}
 	~SDDragonTradeBoxConfig() {}
+	void start() override;
+	void run(SDWindow* sdWindow) override;
+};
+
+class SDGatherConfig : public SDConfig {
+public:
+	SDGatherConfig() {
+		/*
+			xInit --> 600 with square stating on 600 - 13px=587px
+			yInit --> 257-25px(window bar) = 232 with square starting on 232-12px=220px
+			square size => 37x38px
+		*/
+		bag = new Bag(25, 600, 232, 41, 42);
+		speed = 600;
+		rate = 0.7199;
+
+		matTmp = cv::Mat();
+		matWindow = cv::Mat();
+		matResult = cv::Mat();
+		matResultScore = 0.0000;
+	}
+	~SDGatherConfig() {}
+	Bag* bag;
+	cv::Mat matWindow, matTmp, matResult;
+	double matResultScore;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };

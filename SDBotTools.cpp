@@ -73,6 +73,7 @@ SDConfig* SDConfig::getConfig() {
 	cout << "[1] - Drop" << endl;
 	cout << "[2] - Gold Dragon Trade Box" << endl;
 	cout << "[3] - Drop with Bank" << endl;
+	cout << "[4] - Just Gather Items" << endl;
 	cout << "Select script: ";
 	cin >> option;
 
@@ -84,6 +85,8 @@ SDConfig* SDConfig::getConfig() {
 		return new SDDragonTradeBoxConfig();
 	case SDDropWithBank:
 		return new SDDropWithBankConfig();
+	case SDGather:
+		return new SDGatherConfig();
 	default:
 		return nullptr;
 	}
@@ -213,13 +216,14 @@ void SDConfig::loop() {
 
 		minimize:
 			cout << "Free for " << this->getSpeed() / 1000 << endl;
-			for (int time = (this->getSpeed() / 1000); time > 0; time-=5) {
-				Sleep(5000);
-				if (time <= 5) {
-					cout << 5-time << " time left..." << endl;
+			for (int time = (this->getSpeed() / 1000); time > 0; time -= 5) {
+				if (time < 5) {
+					cout << time << " time left..." << endl;
+					Sleep(time);
 				}
 				else {
-					cout << time-5 << " time left..." << endl;
+					cout << time << " time left..." << endl;
+					Sleep(5000);
 				}
 			}
 			if (this->minimize) {
@@ -280,6 +284,7 @@ void SDDropConfig::run(SDWindow * w) {
 
 		bag->upXY(pBag);
 	}
+	bag->restart();
 }
 
 void SDDropWithBankConfig::start() {
@@ -328,6 +333,8 @@ void SDDropWithBankConfig::run(SDWindow* w) {
 		}
 		if (bag->bagToBankItems.size() > 0) w->setFullBank(true);
 	}
+
+	bag->restart();
 }
 
 void SDDragonTradeBoxConfig::start(){}
@@ -342,4 +349,45 @@ void SDDragonTradeBoxConfig::run(SDWindow* w) {
 	// additional information
 
 
+}
+
+void SDGatherConfig::start(){
+	cout << "Gather script config finished...\n";
+}
+
+void SDGatherConfig::run(SDWindow* w){
+	bag->setWindow(w->getWindow());
+	// clear bag
+	bag->restart();
+	clearItemBkup();
+	captureScreenMat(w->getWindow(), matWindow);
+	for (int pBag = 0; pBag < bag->capacity; pBag++) {
+		if (pBag % 15 == 0) {
+			captureScreenMat(w->getWindow(), matWindow);
+			clearItemBkup();
+		}
+		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 13, bag->getY() - 12, xTamItem, yTamItem);
+		for (Item* item : *items) {
+			cv::matchTemplate(matTmp, item->getMat(), matResult, cv::TM_CCOEFF_NORMED);
+			cv::minMaxLoc(matResult, 0, &matResultScore);
+			if (matResultScore > getRate()) {
+				std::cout << "Match with " << item->getCode() << ": " << matResultScore << std::endl;
+
+				if (item->getGather()) {
+					if (item->getXYBkup()->existBkup()) {
+						bag->suapItem(item->getXYBkup()->getX(), item->getXYBkup()->getY(), bag->getX(), bag->getY(), 800);
+					}
+					else {
+						item->getXYBkup()->setBkup(true);
+					}
+					item->getXYBkup()->setXY(bag->getX(), bag->getY());
+				}
+
+				break;
+			}
+		}
+
+		bag->upXY(pBag);
+	}
+	bag->restart();
 }
