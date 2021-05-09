@@ -206,6 +206,7 @@ public:
 	void init();
 	virtual void start() { cout << "start method from SDConfig called..." << endl; };
 	virtual void run(SDWindow* sdWindow) { cout << "run method from SDConfig called..." << endl; };
+	void loop();
 	void codesToItems(std::string codes);
 	void readItem(std::string code, bool tag);
 	int getSpeed() {

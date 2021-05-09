@@ -199,6 +199,37 @@ void SDConfig::init() {
 	cout << "Loading script selected config...\n";
 }
 
+void SDConfig::loop() {
+	while (true) {
+		for (SDWindow* window : *this->sdWindows) {
+		maximize:
+			Sleep(500);
+			ShowWindow(window->getWindow(), SW_SHOWNOACTIVATE);
+			Sleep(2000);
+
+		running:
+			cout << "running next window..." << endl;
+			this->run(window);
+
+		minimize:
+			cout << "Free for " << this->getSpeed() / 1000 << endl;
+			for (int time = (this->getSpeed() / 1000); time > 0; time-=5) {
+				Sleep(5000);
+				if (time <= 5) {
+					cout << 5-time << " time left..." << endl;
+				}
+				else {
+					cout << time-5 << " time left..." << endl;
+				}
+			}
+			if (this->minimize) {
+				cout << "minimized..." << endl;
+				ShowWindow(window->getWindow(), SW_MINIMIZE);
+			}
+		}
+	}
+}
+
 void SDDropConfig::start() {
 	cout << "Drop script config finished...\n";
 }
