@@ -199,6 +199,7 @@ public:
 	}
 	~SDConfig() {}
 	bool minimize = true;
+	bool minimizeBefore = true;
 	std::string windowTitle;
 	int xTamItem, yTamItem;
 	std::vector<SDWindow*>* sdWindows;

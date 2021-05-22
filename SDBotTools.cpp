@@ -175,6 +175,12 @@ void SDConfig::init() {
 
 	if (option == 2) minimize = false;
 
+	cout << "Minimize Before? (Default " << (bool)minimizeBefore << ")\n";
+	cout << "[1] True or [2] False: ";
+	cin >> option;
+
+	if (option == 2) minimizeBefore = false;
+
 	cout << "Insert the codes (use ,):" << "\n";
 	std::string codes;
 	cin >> codes;
@@ -216,6 +222,10 @@ void SDConfig::loop() {
 
 		minimize:
 			cout << "Free for " << this->getSpeed() / 1000 << endl;
+			if (this->minimize && this->minimizeBefore) {
+				cout << "minimized before..." << endl;
+				ShowWindow(window->getWindow(), SW_MINIMIZE);
+			}
 			for (int time = (this->getSpeed() / 1000); time > 0; time -= 5) {
 				if (time < 5) {
 					cout << time << " time left..." << endl;
@@ -226,8 +236,8 @@ void SDConfig::loop() {
 					Sleep(5000);
 				}
 			}
-			if (this->minimize) {
-				cout << "minimized..." << endl;
+			if (this->minimize && !this->minimizeBefore) {
+				cout << "minimized after..." << endl;
 				ShowWindow(window->getWindow(), SW_MINIMIZE);
 			}
 		}
