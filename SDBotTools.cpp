@@ -3,9 +3,17 @@
 void Bag::upXY(int next) {
 	next += 1;
 	x += xJump;
+	// update UOK: normal -> 41 // coluna 4 (pos 3) -> 40
+	if ((next-3) % 5 == 0) {
+		x -= 1;
+	}
 	if (next % 5 == 0) {
 		x = xInit;
 		y += yJump;
+		// update UOK: 6-10 -> 42 // 10-15 -> 41
+		if (next == 10 || next == 25) {
+			y -= 1;
+		}
 		if (next % 15 == 0) {
 			y = yInit;
 			keyPressF2();
@@ -74,6 +82,7 @@ SDConfig* SDConfig::getConfig() {
 	cout << "[2] - Gold Dragon Trade Box" << endl;
 	cout << "[3] - Drop with Bank" << endl;
 	cout << "[4] - Just Gather Items" << endl;
+	cout << "[5] - Get Image from Bag" << endl;
 	cout << "Select script: ";
 	cin >> option;
 
@@ -87,6 +96,8 @@ SDConfig* SDConfig::getConfig() {
 		return new SDDropWithBankConfig();
 	case SDGather:
 		return new SDGatherConfig();
+	case UokGetImg:
+		return new UokGetImgConfig();
 	default:
 		return nullptr;
 	}
@@ -117,8 +128,8 @@ void SDConfig::codesToItems(std::string codes) {
 void SDConfig::readItem(std::string code, bool tag) {
 	int count = 48;
 	cv::Mat matImg;
-	//49=1 to 51=3 ASCII table
-	while (count <= 51){
+	//48=0 to 57=9 ASCII table
+	while (count <= 57){
 		cout << "put:" << code << "/"<< count << endl;
 		matImg = readMat(code);
 
@@ -126,17 +137,15 @@ void SDConfig::readItem(std::string code, bool tag) {
 			items->push_back(new Item(code, tag, matImg));
 			items->back()->toString();
 		}
-		if (count == 48)
-			code.push_back(++count);
-		else
-			code.at(code.size() - 1) = ++count;
-	} 
+
+		code.at(code.size() - 1) = ++count;
+	}
 }
 
 void SDConfig::init() {
 	int option = 1;
 
-	windowTitle = "Supreme Destiny";
+	windowTitle = "Universe Of Kersef";
 	std::string strWindow = windowTitle.c_str();
 	cout << "Search for " << windowTitle << " window?" << "\n";
 	cout << "[1] Yes or [2] Change: ";
@@ -167,7 +176,7 @@ void SDConfig::init() {
 
 	windowTitle = strWindow;
 
-	cout << "Supreme Destiny Windows Count: " << sdWindows->size() << endl << endl;
+	cout << "Windows Count: " << sdWindows->size() << endl << endl;
 
 	cout << "Minimize? (Default " << (bool)minimize << ")\n";
 	cout << "[1] True or [2] False: ";
@@ -213,7 +222,8 @@ void SDConfig::loop() {
 		for (SDWindow* window : *this->sdWindows) {
 		maximize:
 			Sleep(500);
-			ShowWindow(window->getWindow(), SW_SHOWNOACTIVATE);
+			ShowWindow(window->getWindow(), SW_SHOWNORMAL);
+			moveToEmpty();
 			Sleep(2000);
 
 		running:
@@ -376,7 +386,7 @@ void SDGatherConfig::run(SDWindow* w){
 			captureScreenMat(w->getWindow(), matWindow);
 			clearItemBkup();
 		}
-		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 13, bag->getY() - 12, xTamItem, yTamItem);
+		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 14, bag->getY() - 13, xTamItem, yTamItem);
 		for (Item* item : *items) {
 			cv::matchTemplate(matTmp, item->getMat(), matResult, cv::TM_CCOEFF_NORMED);
 			cv::minMaxLoc(matResult, 0, &matResultScore);
@@ -400,4 +410,16 @@ void SDGatherConfig::run(SDWindow* w){
 		bag->upXY(pBag);
 	}
 	bag->restart();
+}
+
+void UokGetImgConfig::start() {
+	cout << "Get Img script config finished...\n";
+}
+
+void UokGetImgConfig::run(SDWindow* w) {
+	captureScreenMat(w->getWindow(), matWindow);
+
+	createMatFromMatSrc(matWindow, matTmp, 540, 254, 32, 32);
+
+	saveMatToFile(matTmp, ".png", "result");
 }

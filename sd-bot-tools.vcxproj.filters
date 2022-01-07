@@ -29,7 +29,10 @@
     <ClInclude Include="OpenCVAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WinAPI.h">
+    <ClInclude Include="WinApiWithRealMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

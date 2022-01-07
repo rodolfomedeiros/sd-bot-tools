@@ -1,5 +1,6 @@
 #pragma once
-#include "WinAPI.h"
+//#include "WinApi.h"
+#include "WinApiWithRealMove.h"
 #include "OpenCVAPI.h"
 #include <vector>
 #include <string>
@@ -184,7 +185,7 @@ public:
 
 class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
-	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4};
+	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4, UokGetImg = 5};
 
 	//proprerties
 	int speed;
@@ -244,11 +245,11 @@ class SDDropConfig : public SDConfig {
 public:
 	SDDropConfig() {
 		/*
-			xInit --> 600 with square stating on 600 - 13px=587px
-			yInit --> 257-25px(window bar) = 232 with square starting on 232-12px=220px
-			square size => 37x38px
+			xInit --> 600 with square stating on 553 - 13px=540px
+			yInit --> square starting on 266-12px=254px NOTE: -25px bar
+			square size => 32x33px
 		*/
-		bag = new Bag(25, 600, 232, 41, 42);
+		bag = new Bag(25, 553, 266, 41, 42);
 		/*
 			xInit --> 311 with square stating on 311 - 13px=298px
 			yInit --> 133-25px(window bar) = 108 with square starting on 108-12px=96px
@@ -297,12 +298,7 @@ public:
 class SDGatherConfig : public SDConfig {
 public:
 	SDGatherConfig() {
-		/*
-			xInit --> 600 with square stating on 600 - 13px=587px
-			yInit --> 257-25px(window bar) = 232 with square starting on 232-12px=220px
-			square size => 37x38px
-		*/
-		bag = new Bag(25, 600, 232, 41, 42);
+		bag = new Bag(25, 553, 266, 41, 42);
 		speed = 600;
 		rate = 0.7199;
 
@@ -315,6 +311,19 @@ public:
 	Bag* bag;
 	cv::Mat matWindow, matTmp, matResult;
 	double matResultScore;
+	void start() override;
+	void run(SDWindow* sdWindow) override;
+};
+
+class UokGetImgConfig : public SDConfig {
+public:
+	UokGetImgConfig() {
+		matTmp = cv::Mat();
+		matWindow = cv::Mat();
+		matResult = cv::Mat();
+	}
+	~UokGetImgConfig() {}
+	cv::Mat matWindow, matTmp, matResult;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };
