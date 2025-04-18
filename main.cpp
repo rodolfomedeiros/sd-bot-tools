@@ -7,8 +7,8 @@ int main()
 	if (script == nullptr) {
 		cout << "No script selected..." << endl;
 		return 0;
-	}
 
+	}
 	//init config general for all
 	script->init();
 

@@ -3,14 +3,14 @@
 void Bag::upXY(int next) {
 	next += 1;
 	x += xJump;
-	// update UOK: normal -> 41 // coluna 4 (pos 3) -> 40
-	if ((next-3) % 5 == 0) {
+	// update: normal -> 41 // coluna 3 (pos 2) -> 40
+	if ((next - 2) % 5 == 0) {
 		x -= 1;
 	}
 	if (next % 5 == 0) {
 		x = xInit;
 		y += yJump;
-		// update UOK: 6-10 -> 42 // 10-15 -> 41
+		// update: 6-10 -> 42 // 10-15 -> 41
 		if (next == 10 || next == 25) {
 			y -= 1;
 		}
@@ -40,9 +40,17 @@ void Bag::upXYWithPBag(int pBag) {
 void Bank::upXY(int next) {
 	next += 1;
 	x += xJump;
+	// update: col 3 (pos 2) -> 42
+	if (((next - 2) % 5 == 0)) {
+		x += 1;
+	}
 	if (next % 5 == 0) {
 		x = xInit;
 		y += yJump;
+		// update: row 2, 5 e 7 (pos 1, 4 e 6) -> 41
+		if (next == 5 || next == 20 || next == 30) {
+			y -= 1;
+		}
 		if (next % 40 == 0) {
 			y = yInit;
 			this->upXYTab();
@@ -87,17 +95,14 @@ SDConfig* SDConfig::getConfig() {
 	cin >> option;
 
 	switch (option) {
-		//drop
 	case SDDrop:
 		return new SDDropConfig();
-	case SDGoldDragonTradeBox:
-		return new SDDragonTradeBoxConfig();
 	case SDDropWithBank:
 		return new SDDropWithBankConfig();
 	case SDGather:
 		return new SDGatherConfig();
-	case UokGetImg:
-		return new UokGetImgConfig();
+	case GetImg:
+		return new GetImgConfig();
 	default:
 		return nullptr;
 	}
@@ -145,7 +150,7 @@ void SDConfig::readItem(std::string code, bool tag) {
 void SDConfig::init() {
 	int option = 1;
 
-	windowTitle = "Universe Of Kersef";
+	windowTitle = "Dynasty of Loki";
 	std::string strWindow = windowTitle.c_str();
 	cout << "Search for " << windowTitle << " window?" << "\n";
 	cout << "[1] Yes or [2] Change: ";
@@ -190,10 +195,18 @@ void SDConfig::init() {
 
 	if (option == 2) minimizeBefore = false;
 
-	cout << "Insert the codes (use ,):" << "\n";
-	std::string codes;
-	cin >> codes;
-	codesToItems(codes);
+	option = 2;
+
+	cout << "Insert Codes? (Default 2 - False)\n";
+	cout << "[1] True or [2] False: ";
+	cin >> option;
+
+	if (option == 1) {
+		cout << "Insert the codes (use ,):" << "\n";
+		std::string codes;
+		cin >> codes;
+		codesToItems(codes);
+	}
 
 	cout << "Change script speed? (default " << getSpeed() << ")" << "\n";
 	cout << "[1] No or [2] Yes: ";
@@ -271,7 +284,7 @@ void SDDropConfig::run(SDWindow * w) {
 			captureScreenMat(w->getWindow(), matWindow);
 			clearItemBkup();
 		}
-		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 13, bag->getY() - 12, xTamItem, yTamItem);
+		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 16, bag->getY() - 17, xTamItem, yTamItem);
 		match = false;
 		for (Item* item : *items) {
 			cv::matchTemplate(matTmp, item->getMat(), matResult, cv::TM_CCOEFF_NORMED);
@@ -298,7 +311,7 @@ void SDDropConfig::run(SDWindow * w) {
 		}
 
 		if (!match) {
-			std::cout << "Trash item: (" << pBag << ")" << " removed..." << std::endl;
+			std::cout << "To trash: (" << pBag << ") - Score: " << matResultScore  << " removed..." << std::endl;
 			bag->itemToTrash(bag->getX(), bag->getY());
 		}
 
@@ -336,14 +349,18 @@ void SDDropWithBankConfig::run(SDWindow* w) {
 		for (int pBank = 0; pBank < bank->capacity; pBank++) {
 			if (bag->bagToBankItems.size() == 0) break;
 			if (pBank % 40 == 0) captureScreenMat(w->getWindow(), matWindow);
-			createMatFromMatSrc(matWindow, matTmp, bank->getX() - 13, bank->getY() - 12, xTamItem, yTamItem);
+			createMatFromMatSrc(matWindow, matTmp, bank->getX(), bank->getY(), xTamItemBank, yTamItemBank);
 			cv::matchTemplate(matTmp, items->at(0)->getMat(), matResult, cv::TM_CCOEFF_NORMED);
 			cv::minMaxLoc(matResult, 0, &matResultScore);
 			if (matResultScore > 0.9199) {
 				cout << "match: empty bank slot (" << pBank << ")" << endl;
 				bag->upXYWithPBag(bag->bagToBankItems.front());
 				bag->bagToBankItems.pop_front();
-				bag->suapItem(bag->getX(), bag->getY(), bank->getX(), bank->getY(), 800);
+				bag->suapItem(bag->getX()
+					, bag->getY()
+					, bank->getX()+(xTamItemBank/2)
+					, bank->getY()+(yTamItemBank/2)
+					, 800);
 			}
 			else {
 				cout << "Bank item found: (" << pBank << ")(" << matResultScore << ")" << endl;
@@ -355,20 +372,6 @@ void SDDropWithBankConfig::run(SDWindow* w) {
 	}
 
 	bag->restart();
-}
-
-void SDDragonTradeBoxConfig::start(){}
-
-void SDDragonTradeBoxConfig::run(SDWindow* w) {
-	//call SDDropConfig
-	//super::start();
-	//super::run(w);
-
-	//COLORREF color = getPixel(497, 149);
-	//std::cout << "R: " << (unsigned int)GetRValue(color) << "G: " << (unsigned int)GetGValue(color) << "B: " << (unsigned int)GetBValue(color) << endl;
-	// additional information
-
-
 }
 
 void SDGatherConfig::start(){
@@ -386,7 +389,7 @@ void SDGatherConfig::run(SDWindow* w){
 			captureScreenMat(w->getWindow(), matWindow);
 			clearItemBkup();
 		}
-		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 14, bag->getY() - 13, xTamItem, yTamItem);
+		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 16, bag->getY() - 17, xTamItem, yTamItem);
 		for (Item* item : *items) {
 			cv::matchTemplate(matTmp, item->getMat(), matResult, cv::TM_CCOEFF_NORMED);
 			cv::minMaxLoc(matResult, 0, &matResultScore);
@@ -412,14 +415,14 @@ void SDGatherConfig::run(SDWindow* w){
 	bag->restart();
 }
 
-void UokGetImgConfig::start() {
+void GetImgConfig::start() {
 	cout << "Get Img script config finished...\n";
 }
 
-void UokGetImgConfig::run(SDWindow* w) {
+void GetImgConfig::run(SDWindow* w) {
 	captureScreenMat(w->getWindow(), matWindow);
 
-	createMatFromMatSrc(matWindow, matTmp, 540, 254, 32, 32);
+	createMatFromMatSrc(matWindow, matTmp, 539, 253, 32, 34);
 
 	saveMatToFile(matTmp, ".png", "result");
 }

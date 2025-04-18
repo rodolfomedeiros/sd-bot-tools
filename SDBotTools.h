@@ -1,5 +1,4 @@
 #pragma once
-//#include "WinApi.h"
 #include "WinApiWithRealMove.h"
 #include "OpenCVAPI.h"
 #include <vector>
@@ -147,9 +146,9 @@ public:
 	*/
 	Bank(int capacity, int xInit, int yInit, int xJump, int yJump)
 		: Cargo(capacity, xInit, yInit, xJump, yJump) {
-		this->xTabJump = 25;
-		this->xTabInit = 428;
-		this->yTabInit = 440;
+		this->xTabJump = 26;
+		this->xTabInit = 442;
+		this->yTabInit = 446;
 	}
 	~Bank() {}
 	void restart();
@@ -185,7 +184,7 @@ public:
 
 class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
-	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4, UokGetImg = 5};
+	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4, GetImg = 5};
 
 	//proprerties
 	int speed;
@@ -194,15 +193,17 @@ protected:
 
 public:
 	SDConfig() {
-		this->xTamItem = 37;
-		this->yTamItem = 38;
+		this->xTamItem = 32;
+		this->yTamItem = 34;
+		this->xTamItemBank = 35;
+		this->yTamItemBank = 37;
 		sdWindows = new vector<SDWindow*>();
 	}
 	~SDConfig() {}
 	bool minimize = true;
 	bool minimizeBefore = true;
 	std::string windowTitle;
-	int xTamItem, yTamItem;
+	int xTamItem, yTamItem, xTamItemBank, yTamItemBank;
 	std::vector<SDWindow*>* sdWindows;
 	static SDConfig* getConfig();
 	void init();
@@ -245,17 +246,16 @@ class SDDropConfig : public SDConfig {
 public:
 	SDDropConfig() {
 		/*
-			xInit --> 600 with square stating on 553 - 13px=540px
-			yInit --> square starting on 266-12px=254px NOTE: -25px bar
-			square size => 32x33px
+			xInit --> XXX with square stating on 539 + 16px = 539 px
+			yInit --> square starting on 253 + 17px = 270px NOTE: 296-26 px tab = 270px
+			square size => 32x34px
 		*/
-		bag = new Bag(25, 553, 266, 41, 42);
+		bag = new Bag(25, 555, 270, 41, 42);
 		/*
-			xInit --> 311 with square stating on 311 - 13px=298px
-			yInit --> 133-25px(window bar) = 108 with square starting on 108-12px=96px
-			square size => 37x38px
+			xInit --> 311 with square stating on 313 - 3px position window = 310px
+			yInit --> 117 - 26px(window bar) = 91px
 		*/
-		bank = new Bank(120, 311, 108, 42, 41);
+		bank = new Bank(120, 310, 91, 41, 42);
 		speed = 600;
 		rate = 0.7199;
 		bagToBank = 15;
@@ -286,19 +286,10 @@ public:
 	void run(SDWindow* w) override;
 };
 
-class SDDragonTradeBoxConfig: public SDDropConfig {
-public:
-	typedef SDDropConfig super;
-	SDDragonTradeBoxConfig() {}
-	~SDDragonTradeBoxConfig() {}
-	void start() override;
-	void run(SDWindow* sdWindow) override;
-};
-
 class SDGatherConfig : public SDConfig {
 public:
 	SDGatherConfig() {
-		bag = new Bag(25, 553, 266, 41, 42);
+		bag = new Bag(25, 555, 270, 41, 42);
 		speed = 600;
 		rate = 0.7199;
 
@@ -315,14 +306,14 @@ public:
 	void run(SDWindow* sdWindow) override;
 };
 
-class UokGetImgConfig : public SDConfig {
+class GetImgConfig : public SDConfig {
 public:
-	UokGetImgConfig() {
+	GetImgConfig() {
 		matTmp = cv::Mat();
 		matWindow = cv::Mat();
 		matResult = cv::Mat();
 	}
-	~UokGetImgConfig() {}
+	~GetImgConfig() {}
 	cv::Mat matWindow, matTmp, matResult;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
