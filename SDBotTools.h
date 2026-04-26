@@ -184,7 +184,7 @@ public:
 
 class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
-	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4, GetImg = 5};
+	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4, GetImg = 5, OcrImage = 6};
 
 	//proprerties
 	int speed;
@@ -230,7 +230,7 @@ public:
 	static BOOL CALLBACK enumWindowsCallback(HWND hwnd, LPARAM lparam) {
 		SDConfig* config = (SDConfig*)lparam;
 
-		const int tamTitle = strlen(config->windowTitle.c_str()) + 1;
+		const int tamTitle = static_cast<int>(strlen(config->windowTitle.c_str()) + 1);
 		LPSTR windowTitle = new char[tamTitle];
 		GetWindowTextA(hwnd, windowTitle, tamTitle);
 
@@ -256,8 +256,8 @@ public:
 			yInit --> 117 - 26px(window bar) = 91px
 		*/
 		bank = new Bank(120, 310, 91, 41, 42);
-		speed = 600;
-		rate = 0.7199;
+		speed = 10000;
+		rate = 0.6199;
 		bagToBank = 15;
 
 		matTmp = cv::Mat();
@@ -291,7 +291,7 @@ public:
 	SDGatherConfig() {
 		bag = new Bag(25, 555, 270, 41, 42);
 		speed = 600;
-		rate = 0.7199;
+		rate = 0.6199;
 
 		matTmp = cv::Mat();
 		matWindow = cv::Mat();
@@ -314,6 +314,19 @@ public:
 		matResult = cv::Mat();
 	}
 	~GetImgConfig() {}
+	cv::Mat matWindow, matTmp, matResult;
+	void start() override;
+	void run(SDWindow* sdWindow) override;
+};
+
+class OcrImageConfig : public SDConfig {
+public:
+	OcrImageConfig() {
+		matTmp = cv::Mat();
+		matWindow = cv::Mat();
+		matResult = cv::Mat();
+	}
+	~OcrImageConfig() {}
 	cv::Mat matWindow, matTmp, matResult;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
