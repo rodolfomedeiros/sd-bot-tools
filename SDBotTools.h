@@ -3,8 +3,8 @@
 #include "OpenCVAPI.h"
 #include <vector>
 #include <string>
-
-using namespace std;
+#include <memory>
+#include <deque>
 
 class SDWindow {
 protected:
@@ -65,14 +65,14 @@ private:
 	std::string code;
 	bool gather = false;
 	cv::Mat mat;
-	Pos* xyBkup;
+	std::unique_ptr<Pos> xyBkup;
 public:
 	Item() {}
 	Item(std::string code, bool gather, cv::Mat mat) {
 		this->code = code;
 		this->gather = gather;
 		this->mat = mat;
-		this->xyBkup = new Pos(false, 0, 0);
+		this->xyBkup = std::make_unique<Pos>(false, 0, 0);
 	}
 	~Item() {}
 
@@ -86,7 +86,7 @@ public:
 		return mat;
 	}
 	Pos* getXYBkup() {
-		return xyBkup;
+		return xyBkup.get();
 	}
 	void setCode(std::string code) {
 		this->code = code;
@@ -98,12 +98,12 @@ public:
 		this->gather = gather;
 	}
 	void toString() {
-		cout << "Item: " << code << " with TAG: " << (int)gather << " Mat size: " << mat.size << " INSERTED!" << endl;
+		std::cout << "Item: " << code << " with TAG: " << (int)gather << " Mat size: " << mat.size << " INSERTED!" << std::endl;
 	}
 };
 
 class Cargo : public WinAPI {
-public:
+protected:
 	int capacity;
 	int xJump;
 	int yJump;
@@ -112,6 +112,7 @@ public:
 	int x;
 	int y;
 	bool full;
+public:
 	Cargo(int capacity, int xInit, int yInit, int xJump, int yJump) {
 		this->xInit = xInit;
 		this->yInit = yInit;
@@ -123,17 +124,19 @@ public:
 	~Cargo() {};
 	int getX() { return x; };
 	int getY() { return y; };
+	int getCapacity() { return capacity; };
 	virtual void restart() {};
 	virtual void upXY(int next) {};
 };
 
 class Bank : public Cargo {
-public:
+protected:
 	int xTabJump;
 	int xTabInit;
 	int yTabInit;
 	int xTab;
 	int yTab;
+public:
 	/*
 		@param yTabinit
 		@param xTabInit
@@ -186,10 +189,13 @@ class SDConfig : public OpenCVAPI, public WinAPI {
 protected:
 	enum Script { SDDrop = 1, SDGoldDragonTradeBox = 2, SDDropWithBank = 3, SDGather = 4, GetImg = 5, OcrImage = 6};
 
-	//proprerties
 	int speed;
 	double rate;
-	std::vector<Item*>* items;
+	std::vector<std::unique_ptr<Item>> items;
+	cv::Mat matWindow, matTmp, matResult;
+	double matResultScore = 0.0;
+
+	void scanBag(Bag* bag, HWND hwnd, bool dropUnmatched);
 
 public:
 	SDConfig() {
@@ -197,18 +203,17 @@ public:
 		this->yTamItem = 34;
 		this->xTamItemBank = 35;
 		this->yTamItemBank = 37;
-		sdWindows = new vector<SDWindow*>();
 	}
 	~SDConfig() {}
 	bool minimize = true;
 	bool minimizeBefore = true;
 	std::string windowTitle;
 	int xTamItem, yTamItem, xTamItemBank, yTamItemBank;
-	std::vector<SDWindow*>* sdWindows;
-	static SDConfig* getConfig();
+	std::vector<std::unique_ptr<SDWindow>> sdWindows;
+	static std::unique_ptr<SDConfig> getConfig();
 	void init();
-	virtual void start() { cout << "start method from SDConfig called..." << endl; };
-	virtual void run(SDWindow* sdWindow) { cout << "run method from SDConfig called..." << endl; };
+	virtual void start() { std::cout << "start method from SDConfig called..." << std::endl; };
+	virtual void run(SDWindow* sdWindow) { std::cout << "run method from SDConfig called..." << std::endl; };
 	void loop();
 	void codesToItems(std::string codes);
 	void readItem(std::string code, bool tag);
@@ -225,17 +230,17 @@ public:
 		this->rate = rate;
 	}
 	void clearItemBkup() {
-		for (Item* item : *items) item->getXYBkup()->setBkup(false);
+		for (auto& item : items) item->getXYBkup()->setBkup(false);
 	}
 	static BOOL CALLBACK enumWindowsCallback(HWND hwnd, LPARAM lparam) {
 		SDConfig* config = (SDConfig*)lparam;
 
-		const int tamTitle = static_cast<int>(strlen(config->windowTitle.c_str()) + 1);
-		LPSTR windowTitle = new char[tamTitle];
-		GetWindowTextA(hwnd, windowTitle, tamTitle);
+		std::string title(config->windowTitle.size() + 1, '\0');
+		GetWindowTextA(hwnd, &title[0], static_cast<int>(title.size()));
+		title.resize(strlen(title.c_str()));
 
-		if (strcmp(windowTitle, config->windowTitle.c_str()) == 0) {
-			config->sdWindows->push_back(new SDWindow(hwnd));
+		if (title == config->windowTitle) {
+			config->sdWindows.push_back(std::make_unique<SDWindow>(hwnd));
 		}
 
 		return true;
@@ -250,29 +255,20 @@ public:
 			yInit --> square starting on 253 + 17px = 270px NOTE: 296-26 px tab = 270px
 			square size => 32x34px
 		*/
-		bag = new Bag(25, 555, 270, 41, 42);
+		bag = std::make_unique<Bag>(25, 555, 270, 41, 42);
 		/*
 			xInit --> 311 with square stating on 313 - 3px position window = 310px
 			yInit --> 117 - 26px(window bar) = 91px
 		*/
-		bank = new Bank(120, 310, 91, 41, 42);
+		bank = std::make_unique<Bank>(120, 310, 91, 41, 42);
 		speed = 10000;
 		rate = 0.6199;
 		bagToBank = 15;
-
-		matTmp = cv::Mat();
-		matWindow = cv::Mat();
-		matResult = cv::Mat();
-		match = false;
-		matResultScore = 0.0000;
 	}
 	~SDDropConfig() {}
-	Bag* bag;
-	Bank* bank;
+	std::unique_ptr<Bag> bag;
+	std::unique_ptr<Bank> bank;
 	int bagToBank;
-	cv::Mat matWindow, matTmp, matResult;
-	double matResultScore;
-	bool match;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };
@@ -289,45 +285,28 @@ public:
 class SDGatherConfig : public SDConfig {
 public:
 	SDGatherConfig() {
-		bag = new Bag(25, 555, 270, 41, 42);
+		bag = std::make_unique<Bag>(25, 555, 270, 41, 42);
 		speed = 600;
 		rate = 0.6199;
-
-		matTmp = cv::Mat();
-		matWindow = cv::Mat();
-		matResult = cv::Mat();
-		matResultScore = 0.0000;
 	}
 	~SDGatherConfig() {}
-	Bag* bag;
-	cv::Mat matWindow, matTmp, matResult;
-	double matResultScore;
+	std::unique_ptr<Bag> bag;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };
 
 class GetImgConfig : public SDConfig {
 public:
-	GetImgConfig() {
-		matTmp = cv::Mat();
-		matWindow = cv::Mat();
-		matResult = cv::Mat();
-	}
+	GetImgConfig() {}
 	~GetImgConfig() {}
-	cv::Mat matWindow, matTmp, matResult;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };
 
 class OcrImageConfig : public SDConfig {
 public:
-	OcrImageConfig() {
-		matTmp = cv::Mat();
-		matWindow = cv::Mat();
-		matResult = cv::Mat();
-	}
+	OcrImageConfig() {}
 	~OcrImageConfig() {}
-	cv::Mat matWindow, matTmp, matResult;
 	void start() override;
 	void run(SDWindow* sdWindow) override;
 };

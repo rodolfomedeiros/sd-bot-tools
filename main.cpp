@@ -2,12 +2,11 @@
 
 int main()
 {
-	SDConfig* script = SDConfig::getConfig();
+	std::unique_ptr<SDConfig> script = SDConfig::getConfig();
 
 	if (script == nullptr) {
-		cout << "No script selected..." << endl;
+		std::cout << "No script selected..." << std::endl;
 		return 0;
-
 	}
 	//init config general for all
 	script->init();
@@ -17,6 +16,6 @@ int main()
 
 	//windows loop
 	script->loop();
-	
+
 	return 0;
 }

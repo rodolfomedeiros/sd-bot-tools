@@ -74,166 +74,74 @@ void Bank::restart() {
 	clickTab(xTab, yTab);
 }
 
-SDConfig* SDConfig::getConfig() {
+std::unique_ptr<SDConfig> SDConfig::getConfig() {
 
 	int option;
 
-	cout << "" << "\n\n";
-	cout << "README:\n";
-	cout << "1 - Open SD Window 800x600\n";
-	cout << "2 - Run as Admin\n";
-	cout << "3 - Open the bag\n";
-	cout << "4 - Place the bag in the upper right of the SD window\n\n";
+	std::cout << "" << "\n\n";
+	std::cout << "README:\n";
+	std::cout << "1 - Open SD Window 800x600\n";
+	std::cout << "2 - Run as Admin\n";
+	std::cout << "3 - Open the bag\n";
+	std::cout << "4 - Place the bag in the upper right of the SD window\n\n";
 
-	cout << "SCRIPT SELECTION\n";
-	cout << "[1] - Drop" << endl;
-	//cout << "[2] - Gold Dragon Trade Box" << endl;
-	cout << "[3] - Drop with Bank" << endl;
-	cout << "[4] - Just Gather Items" << endl;
-	cout << "[5] - Get Image from Bag" << endl;
-	cout << "[6] - Ocr Image" << endl;
-	cout << "Select script: ";
-	cin >> option;
+	std::cout << "SCRIPT SELECTION\n";
+	std::cout << "[1] - Drop" << std::endl;
+	//std::cout << "[2] - Gold Dragon Trade Box" << std::endl;
+	std::cout << "[3] - Drop with Bank" << std::endl;
+	std::cout << "[4] - Just Gather Items" << std::endl;
+	std::cout << "[5] - Get Image from Bag" << std::endl;
+	std::cout << "[6] - Ocr Image" << std::endl;
+	std::cout << "Select script: ";
+	std::cin >> option;
 
 	switch (option) {
 	case SDDrop:
-		return new SDDropConfig();
+		return std::make_unique<SDDropConfig>();
 	case SDDropWithBank:
-		return new SDDropWithBankConfig();
+		return std::make_unique<SDDropWithBankConfig>();
 	case SDGather:
-		return new SDGatherConfig();
+		return std::make_unique<SDGatherConfig>();
 	case GetImg:
-		return new GetImgConfig();
+		return std::make_unique<GetImgConfig>();
 	case OcrImage:
-		return new OcrImageConfig();
+		return std::make_unique<OcrImageConfig>();
 	default:
 		return nullptr;
 	}
 }
 
 void SDConfig::codesToItems(std::string codes) {
-	items = new std::vector<Item*>();
+	items.clear();
 	size_t pos = 0;
 	std::string delimiter = ",";
-	//Read 000
 	readItem("0000", false);
 	bool tag;
-	while ((pos = codes.find(delimiter)) != string::npos) {
-		tag = false;
-		if (codes.at(0) == '1') {
-			tag = true;
-		}
+	while ((pos = codes.find(delimiter)) != std::string::npos) {
+		tag = codes.at(0) == '1';
 		readItem(codes.substr(1, pos - 1), tag);
 		codes.erase(0, pos + delimiter.length());
 	}
-	tag = false;
-	if (codes.at(0) == '1') {
-		tag = true;
-	}
-	readItem(codes.substr(1, string::npos), tag);
+	tag = codes.at(0) == '1';
+	readItem(codes.substr(1, std::string::npos), tag);
 }
 
 void SDConfig::readItem(std::string code, bool tag) {
 	int count = 48;
 	cv::Mat matImg;
 	//48=0 to 57=9 ASCII table
-	while (count <= 57){
-		cout << "put:" << code << "/"<< count << endl;
+	while (count <= 57) {
+		std::cout << "put:" << code << "/" << count << std::endl;
 		matImg = readMat(code);
 
 		if (matImg.data != NULL) {
-			items->push_back(new Item(code, tag, matImg));
-			items->back()->toString();
+			items.push_back(std::make_unique<Item>(code, tag, matImg));
+			items.back()->toString();
 		}
 
 		code.at(code.size() - 1) = ++count;
 	}
 }
-
-/*
-void SDConfig::init() {
-	int option = 1;
-
-	windowTitle = "Dynasty of Loki";
-	std::string strWindow = windowTitle.c_str();
-	cout << "Search for " << windowTitle << " window?" << "\n";
-	cout << "[1] Yes or [2] Change: ";
-	cin >> option;
-
-	if (option == 2) {
-		cout << "Insert the window name: ";
-		cin >> windowTitle;
-	}
-
-	cout << "Change window name: ";
-	cin >> strWindow;
-
-	cout << "Unique or Multiple?\n";
-	cout << "[1] U or [2] M: ";
-	cin >> option;
-
-	if (option == 1) {
-		HWND tmpWindow = FindWindowA(NULL, windowTitle.c_str());
-		SetWindowTextA(tmpWindow, strWindow.c_str());
-		sdWindows->push_back(new SDWindow(tmpWindow));
-	}
-	else if (option == 2 && EnumWindows(enumWindowsCallback, (LPARAM)this)) {
-		for (SDWindow* w : *sdWindows) {
-			SetWindowTextA(w->getWindow(), strWindow.c_str());
-		}
-	}
-
-	windowTitle = strWindow;
-
-	cout << "Windows Count: " << sdWindows->size() << endl << endl;
-
-	cout << "Minimize? (Default " << (bool)minimize << ")\n";
-	cout << "[1] True or [2] False: ";
-	cin >> option;
-
-	if (option == 2) minimize = false;
-
-	cout << "Minimize Before? (Default " << (bool)minimizeBefore << ")\n";
-	cout << "[1] True or [2] False: ";
-	cin >> option;
-
-	if (option == 2) minimizeBefore = false;
-
-	option = 2;
-
-	cout << "Insert Codes? (Default 2 - False)\n";
-	cout << "[1] True or [2] False: ";
-	cin >> option;
-
-	if (option == 1) {
-		cout << "Insert the codes (use ,):" << "\n";
-		std::string codes;
-		cin >> codes;
-		codesToItems(codes);
-	}
-
-	cout << "Change script speed? (default " << getSpeed() << ")" << "\n";
-	cout << "[1] No or [2] Yes: ";
-	cin >> option;
-
-	if (option == 2) {
-		cout << "Speed: ";
-		cin >> speed;
-	}
-
-	cout << "Change rate (0.0-100.0)? (default " << getRate() << ")" << "\n";
-	cout << "[1] No or [2] Yes: ";
-	cin >> option;
-
-	if (option == 2) {
-		cout << "Rate: ";
-		cin >> rate;
-	}
-
-	cout << "\nConfig Initial finished...\n";
-	cout << "Loading script selected config...\n";
-}
-*/
 
 void SDConfig::init() {
 	windowTitle = "teste";
@@ -241,12 +149,12 @@ void SDConfig::init() {
 	std::cout << "Search for " << windowTitle << " window" << "\n";
 	HWND tmpWindow = FindWindowA(NULL, windowTitle.c_str());
 	SetWindowTextA(tmpWindow, strWindow.c_str());
-	sdWindows->push_back(new SDWindow(tmpWindow));
+	sdWindows.push_back(std::make_unique<SDWindow>(tmpWindow));
 
-	std::cout << "Windows Count: " << sdWindows->size() << endl << endl;
+	std::cout << "Windows Count: " << sdWindows.size() << std::endl << std::endl;
 
 	minimize = false;
-    minimizeBefore = false;
+	minimizeBefore = false;
 	speed = 10000;
 
 	std::cout << "\nConfig Initial finished...\n";
@@ -255,63 +163,55 @@ void SDConfig::init() {
 
 void SDConfig::loop() {
 	while (true) {
-		for (SDWindow* window : *this->sdWindows) {
+		for (auto& window : this->sdWindows) {
 			Sleep(500);
 			ShowWindow(window->getWindow(), SW_SHOWNORMAL);
 			moveToEmpty();
 			Sleep(2000);
 
-			cout << "running next window..." << endl;
-			this->run(window);
+			std::cout << "running next window..." << std::endl;
+			this->run(window.get());
 
-			cout << "Free for " << this->getSpeed() / 1000 << endl;
+			std::cout << "Free for " << this->getSpeed() / 1000 << std::endl;
 			if (this->minimize && this->minimizeBefore) {
-				cout << "minimized before..." << endl;
+				std::cout << "minimized before..." << std::endl;
 				ShowWindow(window->getWindow(), SW_MINIMIZE);
 			}
 			for (int time = (this->getSpeed() / 1000); time > 0; time -= 5) {
 				if (time < 5) {
-					cout << time << " time left..." << endl;
+					std::cout << time << " time left..." << std::endl;
 					Sleep(time);
 				}
 				else {
-					cout << time << " time left..." << endl;
+					std::cout << time << " time left..." << std::endl;
 					Sleep(5000);
 				}
 			}
 			if (this->minimize && !this->minimizeBefore) {
-				cout << "minimized after..." << endl;
+				std::cout << "minimized after..." << std::endl;
 				ShowWindow(window->getWindow(), SW_MINIMIZE);
 			}
 		}
 	}
 }
 
-void SDDropConfig::start() {
-	cout << "Drop script config finished...\n";
-}
-
-void SDDropConfig::run(SDWindow * w) {
-	bag->setWindow(w->getWindow());
-	bank->setWindow(w->getWindow());
-	// clear bag
+void SDConfig::scanBag(Bag* bag, HWND hwnd, bool dropUnmatched) {
 	bag->restart();
-	bag->bagToBankItems.clear();
 	clearItemBkup();
-	captureScreenMat(w->getWindow(), matWindow);
-	for (int pBag = 0; pBag < bag->capacity; pBag++) {
+	captureScreenMat(hwnd, matWindow);
+	for (int pBag = 0; pBag < bag->getCapacity(); pBag++) {
 		if (pBag % 15 == 0) {
-			captureScreenMat(w->getWindow(), matWindow);
+			captureScreenMat(hwnd, matWindow);
 			clearItemBkup();
 		}
 		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 16, bag->getY() - 17, xTamItem, yTamItem);
-		match = false;
-		for (Item* item : *items) {
+		bool matched = false;
+		for (auto& item : items) {
 			cv::matchTemplate(matTmp, item->getMat(), matResult, cv::TM_CCOEFF_NORMED);
 			cv::minMaxLoc(matResult, 0, &matResultScore);
 			if (matResultScore > getRate()) {
 				std::cout << "Match with " << item->getCode() << ": " << matResultScore << std::endl;
-				match = true;
+				matched = true;
 
 				if (item->getGather()) {
 					if (item->getXYBkup()->existBkup()) {
@@ -321,17 +221,17 @@ void SDDropConfig::run(SDWindow * w) {
 						item->getXYBkup()->setBkup(true);
 					}
 					item->getXYBkup()->setXY(bag->getX(), bag->getY());
-				}else if (!item->getGather() && item->getCode().compare("0000") != 0) {
+				}
+				else if (dropUnmatched && item->getCode().compare("0000") != 0) {
 					bag->bagToBankItems.push_back(pBag);
-					//cout << "bag to bank: (" << pBag << ")" << endl;
 				}
 
 				break;
 			}
 		}
 
-		if (!match) {
-			std::cout << "To trash: (" << pBag << ") - Score: " << matResultScore  << " removed..." << std::endl;
+		if (!matched && dropUnmatched) {
+			std::cout << "To trash: (" << pBag << ") - Score: " << matResultScore << " removed..." << std::endl;
 			bag->itemToTrash(bag->getX(), bag->getY());
 		}
 
@@ -340,117 +240,93 @@ void SDDropConfig::run(SDWindow * w) {
 	bag->restart();
 }
 
+void SDDropConfig::start() {
+	std::cout << "Drop script config finished...\n";
+}
+
+void SDDropConfig::run(SDWindow* w) {
+	bag->setWindow(w->getWindow());
+	bank->setWindow(w->getWindow());
+	bag->bagToBankItems.clear();
+	scanBag(bag.get(), w->getWindow(), true);
+}
+
 void SDDropWithBankConfig::start() {
 	super::start();
 
 	int option;
 
-	cout << "Change BagToBank (0-25)? (default " << bagToBank << ")" << "\n";
-	cout << "[1] No or [2] Yes: ";
-	cin >> option;
+	std::cout << "Change BagToBank (0-25)? (default " << bagToBank << ")" << "\n";
+	std::cout << "[1] No or [2] Yes: ";
+	std::cin >> option;
 
 	if (option == 2) {
-		cout << "BagToBank: ";
-		cin >> bagToBank;
+		std::cout << "BagToBank: ";
+		std::cin >> bagToBank;
 	}
 
-	cout << "DropWithBank script config finished...\n";
+	std::cout << "DropWithBank script config finished...\n";
 }
 
 void SDDropWithBankConfig::run(SDWindow* w) {
 	super::run(w);
 
-	//count items and verify bag capacity
 	if (w->isFullBank()) return;
-	if (bag->bagToBankItems.size() >= bagToBank) {
+	if (bag->bagToBankItems.size() >= static_cast<size_t>(bagToBank)) {
 		bag->restart();
 		bank->restart();
 		captureScreenMat(w->getWindow(), matWindow);
-		for (int pBank = 0; pBank < bank->capacity; pBank++) {
-			if (bag->bagToBankItems.size() == 0) break;
+		for (int pBank = 0; pBank < bank->getCapacity(); pBank++) {
+			if (bag->bagToBankItems.empty()) break;
 			if (pBank % 40 == 0) captureScreenMat(w->getWindow(), matWindow);
 			createMatFromMatSrc(matWindow, matTmp, bank->getX(), bank->getY(), xTamItemBank, yTamItemBank);
-			cv::matchTemplate(matTmp, items->at(0)->getMat(), matResult, cv::TM_CCOEFF_NORMED);
+			cv::matchTemplate(matTmp, items.at(0)->getMat(), matResult, cv::TM_CCOEFF_NORMED);
 			cv::minMaxLoc(matResult, 0, &matResultScore);
 			if (matResultScore > 0.9199) {
-				cout << "match: empty bank slot (" << pBank << ")" << endl;
+				std::cout << "match: empty bank slot (" << pBank << ")" << std::endl;
 				bag->upXYWithPBag(bag->bagToBankItems.front());
 				bag->bagToBankItems.pop_front();
 				bag->suapItem(bag->getX()
 					, bag->getY()
-					, bank->getX()+(xTamItemBank/2)
-					, bank->getY()+(yTamItemBank/2)
+					, bank->getX() + (xTamItemBank / 2)
+					, bank->getY() + (yTamItemBank / 2)
 					, 800);
 			}
 			else {
-				cout << "Bank item found: (" << pBank << ")(" << matResultScore << ")" << endl;
+				std::cout << "Bank item found: (" << pBank << ")(" << matResultScore << ")" << std::endl;
 			}
 
 			bank->upXY(pBank);
 		}
-		if (bag->bagToBankItems.size() > 0) w->setFullBank(true);
+		if (!bag->bagToBankItems.empty()) w->setFullBank(true);
 	}
 
 	bag->restart();
 }
 
 void SDGatherConfig::start(){
-	cout << "Gather script config finished...\n";
+	std::cout << "Gather script config finished...\n";
 }
 
 void SDGatherConfig::run(SDWindow* w){
 	bag->setWindow(w->getWindow());
-	// clear bag
-	bag->restart();
-	clearItemBkup();
-	captureScreenMat(w->getWindow(), matWindow);
-	for (int pBag = 0; pBag < bag->capacity; pBag++) {
-		if (pBag % 15 == 0) {
-			captureScreenMat(w->getWindow(), matWindow);
-			clearItemBkup();
-		}
-		createMatFromMatSrc(matWindow, matTmp, bag->getX() - 16, bag->getY() - 17, xTamItem, yTamItem);
-		for (Item* item : *items) {
-			cv::matchTemplate(matTmp, item->getMat(), matResult, cv::TM_CCOEFF_NORMED);
-			cv::minMaxLoc(matResult, 0, &matResultScore);
-			if (matResultScore > getRate()) {
-				std::cout << "Match with " << item->getCode() << ": " << matResultScore << std::endl;
-
-				if (item->getGather()) {
-					if (item->getXYBkup()->existBkup()) {
-						bag->suapItem(item->getXYBkup()->getX(), item->getXYBkup()->getY(), bag->getX(), bag->getY(), 800);
-					}
-					else {
-						item->getXYBkup()->setBkup(true);
-					}
-					item->getXYBkup()->setXY(bag->getX(), bag->getY());
-				}
-
-				break;
-			}
-		}
-
-		bag->upXY(pBag);
-	}
-	bag->restart();
+	scanBag(bag.get(), w->getWindow(), false);
 }
 
 void GetImgConfig::start() {
-	cout << "Get Img script config finished...\n";
+	std::cout << "Get Img script config finished...\n";
 }
 
 void GetImgConfig::run(SDWindow* w) {
 	captureScreenMat(w->getWindow(), matWindow);
-
 	createMatFromMatSrc(matWindow, matTmp, 539, 253, 32, 34);
-
 	saveMatToFile(matTmp, ".png", "result");
 }
 
 void OcrImageConfig::start() {
-	cout << "OcrImageConfig started...\n";
+	std::cout << "OcrImageConfig started...\n";
 }
 
 void OcrImageConfig::run(SDWindow* w) {
-	cout << "OcrImageConfig running...\n";
+	std::cout << "OcrImageConfig running...\n";
 }
