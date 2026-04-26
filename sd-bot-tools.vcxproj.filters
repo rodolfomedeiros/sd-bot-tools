@@ -21,6 +21,9 @@
     <ClCompile Include="SDBotTools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OcrImageConfig2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDBotTools.h">
@@ -32,5 +35,18 @@
     <ClInclude Include="WinApiWithRealMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OcrImageConfig2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sd-bot-tools\.github\copilot-instructions.md" />
+    <None Include="sd-bot-tools\.github\agents\build-quality-agent.md" />
+    <None Include="sd-bot-tools\.github\agents\game-automation-agent.md" />
+    <None Include="sd-bot-tools\.github\knowledge\architecture.md" />
+    <None Include="sd-bot-tools\.github\knowledge\opencv-integration.md" />
+    <None Include="sd-bot-tools\.github\knowledge\winapi-usage.md" />
+    <None Include="sd-bot-tools\.github\knowledge\item-codes.md" />
+    <None Include="sd-bot-tools\.github\knowledge\build-setup.md" />
   </ItemGroup>
 </Project>

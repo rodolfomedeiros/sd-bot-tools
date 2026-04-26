@@ -18,7 +18,7 @@ public:
 		Sleep(10);
 		SendMessage(window, WM_KEYUP, VK_F1, 0);
 		moveToEmpty();
-		Sleep(300);
+		Sleep(400);
 	}
 
 	void keyPressF2() {
@@ -26,66 +26,42 @@ public:
 		Sleep(10);
 		SendMessage(window, WM_KEYUP, VK_F2, 0);
 		moveToEmpty();
-		Sleep(300);
+		Sleep(400);
 	}
 
 	void itemToTrash(int x, int y) {
+		Sleep(100);
+		
+		// ITEM
+		// Define as coordenadas dentro da janela
+		LPARAM coordenadas = MAKELPARAM(x, y); 
+		// Envia a mensagem de movimento do mouse
+		SendMessage(window, WM_MOUSEMOVE, 0, coordenadas);
+		// Simula um clique na posição desejada
+		SendMessage(window, WM_LBUTTONDOWN, 0, coordenadas);
+		SendMessage(window, WM_LBUTTONUP, 0, coordenadas);
+		Sleep(100);
+
+		// TRASH
+		INPUT input = { 0 };
 		POINT p = { 0,0 };
 		ClientToScreen(window, &p);
-		
-		INPUT input = {0};
-
-		//ITEM
-		x = GetAbsoluteCoordinate((p.x - 1) + x, GetSystemMetrics(SM_CXVIRTUALSCREEN));
-		y = GetAbsoluteCoordinate((p.y - 1) + y, GetSystemMetrics(SM_CYVIRTUALSCREEN));
-		input = { 0 };
 		input.type = INPUT_MOUSE;
-		input.mi.dx = x;
-		input.mi.dy = y;
-		input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+		input.mi.dx = GetAbsoluteCoordinate((p.x - 1) + 720, GetSystemMetrics(SM_CXVIRTUALSCREEN)); // desired X coordinate
+		input.mi.dy = GetAbsoluteCoordinate((p.y - 1) + 405, GetSystemMetrics(SM_CYVIRTUALSCREEN)); ; // desired Y coordinate
+		input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
 		SendInput(1, &input, sizeof(INPUT));
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = x;
-		input.mi.dy = y;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(50);
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = x;
-		input.mi.dy = y;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(50);
-
-		//TRASH
-		x = GetAbsoluteCoordinate((p.x - 1) + 720, GetSystemMetrics(SM_CXVIRTUALSCREEN));
-		y = GetAbsoluteCoordinate((p.y - 1) + 405, GetSystemMetrics(SM_CYVIRTUALSCREEN));
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = x;
-		input.mi.dy = y;
-		input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
-		SendInput(1, &input, sizeof(INPUT));
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = x;
-		input.mi.dy = y;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(50);
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = x;
-		input.mi.dy = y;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(50);
+		coordenadas = MAKELPARAM(720, 405);
+		// Envia a mensagem de movimento do mouse
+		SendMessage(window, WM_MOUSEMOVE, 0, coordenadas);
+		// Simula um clique na posição desejada
+		SendMessage(window, WM_LBUTTONDOWN, 0, coordenadas);
+		SendMessage(window, WM_LBUTTONUP, 0, coordenadas);
+		Sleep(100);
 		
 		//ENTER
 		PostMessage(window, WM_KEYDOWN, VK_RETURN, 1);
-		Sleep(150);
+		Sleep(500);
 	}
 
 	INT GetAbsoluteCoordinate(INT PixelCoordinate, INT ScreenResolution)
@@ -95,98 +71,63 @@ public:
 	}
 
 	void clickTab(int xTab, int yTab) {
-		INPUT input = {0};
-
-		POINT p = { 0,0 };
-		ClientToScreen(window, &p);
+		// Define as coordenadas dentro da janela
+		LPARAM coordenadas = MAKELPARAM(xTab, yTab);
 		for (int i = 0; i < 2; i++) {
-			input.type = INPUT_MOUSE;
-			input.mi.dx = GetAbsoluteCoordinate((p.x - 1) + xTab, GetSystemMetrics(SM_CXVIRTUALSCREEN)); // desired X coordinate
-			input.mi.dy = GetAbsoluteCoordinate((p.y - 1) + yTab, GetSystemMetrics(SM_CYVIRTUALSCREEN)); ; // desired Y coordinate
-			input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
-			SendInput(1, &input, sizeof(INPUT));
-			input = { 0 };
-			input.type = INPUT_MOUSE;
-			input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-			SendInput(1, &input, sizeof(INPUT));
-			Sleep(50);
-			input = { 0 };
-			input.type = INPUT_MOUSE;
-			input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-			SendInput(1, &input, sizeof(INPUT));
+			// Envia a mensagem de movimento do mouse
+			SendMessage(window, WM_MOUSEMOVE, 0, coordenadas);
+			// Simula um clique na posição desejada
+			SendMessage(window, WM_LBUTTONDOWN, 0, coordenadas);
+			SendMessage(window, WM_LBUTTONUP, 0, coordenadas);
 			Sleep(50);
 		}
 		Sleep(300);
 	}
 
 	void suapItem(int xBkup, int yBkup, int posX, int posY, int delay) {
-		POINT p = { 0,0 };
-		ClientToScreen(window, &p);
+		// Define as coordenadas dentro da janela
+		LPARAM coordenadas = MAKELPARAM(xBkup, yBkup);
+		// Envia a mensagem de movimento do mouse
+		SendMessage(window, WM_MOUSEMOVE, 0, coordenadas);
+		// Simula um clique na posição desejada
+		SendMessage(window, WM_LBUTTONDOWN, 0, coordenadas);
+		SendMessage(window, WM_LBUTTONUP, 0, coordenadas);
+		Sleep(150);
 
 		INPUT input = { 0 };
-
-		// backup
-		xBkup = GetAbsoluteCoordinate((p.x - 1) + xBkup, GetSystemMetrics(SM_CXVIRTUALSCREEN));
-		yBkup = GetAbsoluteCoordinate((p.y - 1) + yBkup, GetSystemMetrics(SM_CYVIRTUALSCREEN));
-		input = { 0 };
+		POINT p = { 0,0 };
+		ClientToScreen(window, &p);
 		input.type = INPUT_MOUSE;
-		input.mi.dx = xBkup;
-		input.mi.dy = yBkup;
-		input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+		input.mi.dx = GetAbsoluteCoordinate((p.x - 1) + posX, GetSystemMetrics(SM_CXVIRTUALSCREEN)); // desired X coordinate
+		input.mi.dy = GetAbsoluteCoordinate((p.y - 1) + posY, GetSystemMetrics(SM_CYVIRTUALSCREEN)); ; // desired Y coordinate
+		input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
 		SendInput(1, &input, sizeof(INPUT));
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = xBkup;
-		input.mi.dy = yBkup;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(10);
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = xBkup;
-		input.mi.dy = yBkup;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(100);
 
 		// next pos
-		posX = GetAbsoluteCoordinate((p.x - 1) + posX, GetSystemMetrics(SM_CXVIRTUALSCREEN));
-		posY = GetAbsoluteCoordinate((p.y - 1) + posY, GetSystemMetrics(SM_CYVIRTUALSCREEN));
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = posX;
-		input.mi.dy = posY;
-		input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
-		SendInput(1, &input, sizeof(INPUT));
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = posX;
-		input.mi.dy = posY;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		SendInput(1, &input, sizeof(INPUT));
-		Sleep(10);
-		input = { 0 };
-		input.type = INPUT_MOUSE;
-		input.mi.dx = posX;
-		input.mi.dy = posY;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		SendInput(1, &input, sizeof(INPUT));
+		// Define as coordenadas dentro da janela
+	    coordenadas = MAKELPARAM(posX, posY);
+		// Envia a mensagem de movimento do mouse
+		SendMessage(window, WM_MOUSEMOVE, 0, coordenadas);
+		// Simula um clique na posição desejada
+		SendMessage(window, WM_LBUTTONDOWN, 0, coordenadas);
+		SendMessage(window, WM_LBUTTONUP, 0, coordenadas);
 		Sleep(delay);
 	}
 
 	void moveToEmpty() {
+		INPUT input = { 0 };
 		POINT p = { 0,0 };
 		ClientToScreen(window, &p);
-
-		// CANTO NEUTRO
-		int posX = GetAbsoluteCoordinate((p.x - 1) + 577, GetSystemMetrics(SM_CXVIRTUALSCREEN));
-		int posY = GetAbsoluteCoordinate((p.y - 1) + 440, GetSystemMetrics(SM_CYVIRTUALSCREEN));
-		INPUT input = { 0 };
 		input.type = INPUT_MOUSE;
-		input.mi.dx = posX;
-		input.mi.dy = posY;
-		input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+		input.mi.dx = GetAbsoluteCoordinate((p.x - 1) + 577, GetSystemMetrics(SM_CXVIRTUALSCREEN)); // desired X coordinate
+		input.mi.dy = GetAbsoluteCoordinate((p.y - 1) + 440, GetSystemMetrics(SM_CYVIRTUALSCREEN)); ; // desired Y coordinate
+		input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
 		SendInput(1, &input, sizeof(INPUT));
+		LPARAM coordenadas = MAKELPARAM(577, 440);
+		// Simula um clique na posição desejada
+		SendMessage(window, WM_RBUTTONDOWN, 0, coordenadas);
+		SendMessage(window, WM_RBUTTONUP, 0, coordenadas);
+		Sleep(50);
 	}
 
 	int getWindowX() {

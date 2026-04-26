@@ -87,10 +87,11 @@ SDConfig* SDConfig::getConfig() {
 
 	cout << "SCRIPT SELECTION\n";
 	cout << "[1] - Drop" << endl;
-	cout << "[2] - Gold Dragon Trade Box" << endl;
+	//cout << "[2] - Gold Dragon Trade Box" << endl;
 	cout << "[3] - Drop with Bank" << endl;
 	cout << "[4] - Just Gather Items" << endl;
 	cout << "[5] - Get Image from Bag" << endl;
+	cout << "[6] - Ocr Image" << endl;
 	cout << "Select script: ";
 	cin >> option;
 
@@ -103,6 +104,8 @@ SDConfig* SDConfig::getConfig() {
 		return new SDGatherConfig();
 	case GetImg:
 		return new GetImgConfig();
+	case OcrImage:
+		return new OcrImageConfig();
 	default:
 		return nullptr;
 	}
@@ -147,6 +150,7 @@ void SDConfig::readItem(std::string code, bool tag) {
 	}
 }
 
+/*
 void SDConfig::init() {
 	int option = 1;
 
@@ -229,21 +233,37 @@ void SDConfig::init() {
 	cout << "\nConfig Initial finished...\n";
 	cout << "Loading script selected config...\n";
 }
+*/
+
+void SDConfig::init() {
+	windowTitle = "teste";
+	std::string strWindow = windowTitle.c_str();
+	std::cout << "Search for " << windowTitle << " window" << "\n";
+	HWND tmpWindow = FindWindowA(NULL, windowTitle.c_str());
+	SetWindowTextA(tmpWindow, strWindow.c_str());
+	sdWindows->push_back(new SDWindow(tmpWindow));
+
+	std::cout << "Windows Count: " << sdWindows->size() << endl << endl;
+
+	minimize = false;
+    minimizeBefore = false;
+	speed = 10000;
+
+	std::cout << "\nConfig Initial finished...\n";
+	std::cout << "Loading script selected config...\n";
+}
 
 void SDConfig::loop() {
 	while (true) {
 		for (SDWindow* window : *this->sdWindows) {
-		maximize:
 			Sleep(500);
 			ShowWindow(window->getWindow(), SW_SHOWNORMAL);
 			moveToEmpty();
 			Sleep(2000);
 
-		running:
 			cout << "running next window..." << endl;
 			this->run(window);
 
-		minimize:
 			cout << "Free for " << this->getSpeed() / 1000 << endl;
 			if (this->minimize && this->minimizeBefore) {
 				cout << "minimized before..." << endl;
@@ -425,4 +445,12 @@ void GetImgConfig::run(SDWindow* w) {
 	createMatFromMatSrc(matWindow, matTmp, 539, 253, 32, 34);
 
 	saveMatToFile(matTmp, ".png", "result");
+}
+
+void OcrImageConfig::start() {
+	cout << "OcrImageConfig started...\n";
+}
+
+void OcrImageConfig::run(SDWindow* w) {
+	cout << "OcrImageConfig running...\n";
 }
